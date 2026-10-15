@@ -48,6 +48,7 @@ import { PaywallModal } from './components/PaywallModal';
 import { RankingModal } from './components/RankingModal';
 import { SubjectPerformanceDashboard } from './components/SubjectPerformanceDashboard';
 import { NormFilterModal } from './components/NormFilterModal';
+import { AdminPanel } from './components/AdminPanel';
 
 import {
   ChevronLeft,
@@ -58,6 +59,7 @@ import {
   MessageSquare,
   LayoutGrid,
   ShieldAlert,
+  Shield,
 } from 'lucide-react';
 
 type ScreenState = 'home' | 'quiz' | 'result';
@@ -76,13 +78,13 @@ export default function App() {
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
   const [sessionTerminatedNotice, setSessionTerminatedNotice] = useState<string | null>(null);
 
-  // Modais de Novas Funcionalidades
+  // Modais e Painel Admin
   const [isRankingOpen, setIsRankingOpen] = useState<boolean>(false);
   const [isPerformanceOpen, setIsPerformanceOpen] = useState<boolean>(false);
   const [isNormFilterOpen, setIsNormFilterOpen] = useState<boolean>(false);
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [questionToExplain, setQuestionToExplain] = useState<Question | null>(null);
 
-  // Modais Existentes
   const [isGridOpenMobile, setIsGridOpenMobile] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -104,7 +106,10 @@ export default function App() {
   const activeQuestionsRef = useRef<Question[]>(activeQuestions);
   activeQuestionsRef.current = activeQuestions;
 
-  // Monitorar Autenticação e Sessão Única do Firebase
+  // Verificação do Administrador
+  const ADMIN_EMAIL = 'pedroalvessilva0912@gmail.com';
+  const isAdmin = currentUser?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
   useEffect(() => {
     let unsubscribeSession: (() => void) | null = null;
 
@@ -211,7 +216,6 @@ export default function App() {
     }
   }, []);
 
-  // Salvamento Automático Local Contínuo
   useEffect(() => {
     if (screen === 'quiz' && !isExamFinished && activeQuestions.length > 0) {
       const draftData = {
@@ -232,7 +236,6 @@ export default function App() {
     }
   }, [screen, isExamFinished, activeQuestions, currentIndex, answers, eliminated, flagged, timeSpentSeconds, currentSubjectId, quizMode]);
 
-  // Monitorar horário para modo automático dia/noite
   useEffect(() => {
     const checkDay = () => setIsDay(isDayTime());
     checkDay();
@@ -497,6 +500,23 @@ export default function App() {
         onIncreaseFontSize={handleIncreaseFontSize}
       />
 
+      {/* Botão Flutuante de Acesso Exclusivo do Administrador */}
+      {isAdmin && (
+        <div className="bg-[#002D62] border-b border-blue-900 px-4 py-2 flex items-center justify-between text-xs text-white">
+          <div className="flex items-center gap-2 font-medium">
+            <Shield className="w-4 h-4 text-[#D4AF37]" />
+            <span>Painel Administrativo do Proprietário Ativo</span>
+          </div>
+          <button
+            onClick={() => setIsAdminOpen(true)}
+            className="px-3 py-1 rounded-lg bg-[#D4AF37] hover:bg-yellow-600 text-slate-950 font-bold transition-colors shadow-sm flex items-center gap-1.5"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>Abrir Painel Admin</span>
+          </button>
+        </div>
+      )}
+
       {/* Main Content Area - Otimizado com largura fluida */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {screen === 'home' && (
@@ -665,7 +685,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Modais Gerais */}
+      {/* Modais e Painel Admin */}
       {isAuthOpen && (
         <AuthModal
           isOpen={isAuthOpen}
@@ -681,6 +701,14 @@ export default function App() {
         <RankingModal
           isOpen={isRankingOpen}
           onClose={() => setIsRankingOpen(false)}
+        />
+      )}
+
+      {isAdminOpen && (
+        <AdminPanel
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+          currentUser={currentUser}
         />
       )}
     </div>
