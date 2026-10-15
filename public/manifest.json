@@ -2,7 +2,7 @@
   "id": "/",
   "name": "SIMULADO CFC - SAD - Força Aérea Brasileira",
   "short_name": "CFC - SAD",
-  "description": "Plataforma de simulados preparatórios para o Curso de Formação de Cabos (CFC - SAD) da Força Aérea Brasileira.",
+  "description": "Plataforma de simulados preparatórios para o Curso de Formação de Cabos (CFC - SAD) da FAB.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
