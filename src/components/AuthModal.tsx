@@ -42,11 +42,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const handleDemoAccess = (withFullAccess: boolean = true) => {
     try {
       const demoProfile = loginDemoStudent(withFullAccess);
+      // Força o seu e-mail de admin no modo demo para testar o painel no PC
+      demoProfile.email = 'pedroalvessilva0912@gmail.com';
+      demoProfile.name = 'Pedro Henrique (Admin)';
+      demoProfile.hasAccess = true;
+      demoProfile.active = true;
+      demoProfile.ativo = true;
+      
       onSuccess(demoProfile);
       onClose();
     } catch (e) {
       console.error('Erro no login demo:', e);
-      setErrorMsg('Não foi possível iniciar a sessão de teste.');
     }
   };
 
