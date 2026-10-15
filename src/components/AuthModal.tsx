@@ -7,15 +7,13 @@ import {
   ShieldCheck,
   AlertCircle,
   ArrowRight,
-  KeyRound,
-  Sparkles
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import {
   loginStudent,
   registerStudent,
   sendStudentPasswordReset,
-  loginDemoStudent,
-  createContingencyStudent,
   UserProfile
 } from '../utils/firebase';
 import { FabBadge } from './FabBadge';
@@ -32,27 +30,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
-
-  const handleDemoAccess = (withFullAccess: boolean = true) => {
-    try {
-      const demoProfile = loginDemoStudent(withFullAccess);
-      demoProfile.email = 'pedroalvessilva0912@gmail.com';
-      demoProfile.name = 'Pedro Henrique Guedes Alves Ferreira (Admin)';
-      demoProfile.hasAccess = true;
-      demoProfile.active = true;
-      demoProfile.ativo = true;
-      
-      onSuccess(demoProfile);
-      onClose();
-    } catch (e) {
-      console.error('Erro no login demo:', e);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +67,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         setSuccessMsg('E-mail de recuperação enviado com sucesso!');
       }
     } catch (err: any) {
-      console.error('Erro no submit:', err);
-      setErrorMsg('Erro ao processar autenticação. Utilize o botão de Aluno Teste abaixo.');
+      setErrorMsg('Erro ao processar autenticação. Verifique os dados informados.');
     } finally {
       setLoading(false);
     }
@@ -100,11 +82,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xs" />
 
       <div className="relative z-10 bg-white dark:bg-[#0B192C] w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col my-auto text-slate-900 dark:text-slate-100">
+        
+        {/* Top Header - Apenas "Portal do Aluno" */}
         <div className="p-5 bg-gradient-to-r from-[#002D62] to-[#0B192C] text-white flex items-center justify-between border-b border-[#D4AF37]/30">
           <div className="flex items-center gap-3">
             <FabBadge size="md" />
             <div>
-              <h2 className="text-sm sm:text-base font-bold tracking-tight">Portal do Aluno CFC SAD</h2>
+              <h2 className="text-sm sm:text-base font-bold tracking-tight">Portal do Aluno</h2>
               <p className="text-[11px] text-blue-200">Autenticação Oficial</p>
             </div>
           </div>
@@ -113,6 +97,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           </button>
         </div>
 
+        {/* Abas de Navegação */}
         <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
           <button
             type="button"
@@ -130,6 +115,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           </button>
         </div>
 
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-start gap-2">
@@ -156,7 +142,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Seu Nome / Nome de Guerra"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62]"
                 />
               </div>
             </div>
@@ -172,7 +158,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu.email@exemplo.com"
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white"
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62]"
               />
             </div>
           </div>
@@ -183,13 +169,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white"
+                  className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62]"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  title={showPassword ? 'Ocultar senha' : 'Ver senha'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
           )}
@@ -197,21 +191,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#002D62] to-[#0B192C] shadow-md flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#002D62] to-[#0B192C] shadow-md flex items-center justify-center gap-2 hover:opacity-95 transition-all"
           >
             {loading ? 'Processando...' : tab === 'login' ? 'Acessar Simulados' : tab === 'register' ? 'Concluir Cadastro' : 'Enviar Link'}
           </button>
-
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center">
-            <button
-              type="button"
-              onClick={() => handleDemoAccess(true)}
-              className="w-full py-2.5 px-4 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 text-[#002D62] dark:text-blue-300 font-bold text-xs border border-blue-200 dark:border-blue-800 flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Entrar como Aluno Teste (Acesso Completo Imediato)</span>
-            </button>
-          </div>
         </form>
       </div>
     </div>
