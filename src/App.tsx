@@ -19,7 +19,6 @@ import {
   ThemeMode,
   FontSizePreference,
   isDayTime,
-  clearAllQuizData,
 } from './utils/storage';
 import {
   auth,
@@ -54,11 +53,9 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle,
-  AlertTriangle,
   Home,
   MessageSquare,
   LayoutGrid,
-  ShieldAlert,
   Shield,
 } from 'lucide-react';
 
@@ -76,6 +73,7 @@ export default function App() {
   // Autenticação Firebase e Perfil de Acesso
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSavedDemoStudent());
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState<boolean>(false);
   const [sessionTerminatedNotice, setSessionTerminatedNotice] = useState<string | null>(null);
 
   // Modais e Painel Admin
@@ -83,7 +81,6 @@ export default function App() {
   const [isPerformanceOpen, setIsPerformanceOpen] = useState<boolean>(false);
   const [isNormFilterOpen, setIsNormFilterOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
-  const [questionToExplain, setQuestionToExplain] = useState<Question | null>(null);
 
   const [isGridOpenMobile, setIsGridOpenMobile] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -165,8 +162,6 @@ export default function App() {
         const demo = getSavedDemoStudent();
         if (demo) {
           setCurrentUser(demo);
-        } else {
-          setCurrentUser(null);
         }
         if (unsubscribeSession) {
           unsubscribeSession();
@@ -180,61 +175,6 @@ export default function App() {
       if (unsubscribeSession) unsubscribeSession();
     };
   }, []);
-
-  // Recuperar rascunho de prova em andamento
-  useEffect(() => {
-    try {
-      const savedDraft = localStorage.getItem(LOCAL_DRAFT_EXAM_KEY);
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        if (parsed.questionIds && parsed.questionIds.length > 0 && !parsed.isExamFinished) {
-          const idMap = new Map<string, Question>();
-          simuladoGeral416Questions.forEach((q) => idMap.set(q.id, q));
-
-          const restoredQuestions: Question[] = [];
-          parsed.questionIds.forEach((id: string) => {
-            const found = idMap.get(id);
-            if (found) restoredQuestions.push(found);
-          });
-
-          if (restoredQuestions.length > 0) {
-            setActiveQuestions(restoredQuestions);
-            setCurrentSubjectId(parsed.subjectId || 'simulado_geral');
-            setQuizMode(parsed.quizMode || 'study');
-            setCurrentIndex(parsed.currentIndex || 0);
-            setAnswers(parsed.answers || {});
-            setEliminated(parsed.eliminated || {});
-            setFlagged(parsed.flagged || {});
-            setTimeSpentSeconds(parsed.timeSpentSeconds || 0);
-            setIsExamFinished(false);
-            setScreen('quiz');
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('Não foi possível restaurar o rascunho:', e);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (screen === 'quiz' && !isExamFinished && activeQuestions.length > 0) {
-      const draftData = {
-        subjectId: currentSubjectId,
-        quizMode,
-        questionIds: activeQuestions.map((q) => q.id),
-        currentIndex,
-        answers,
-        eliminated,
-        flagged,
-        timeSpentSeconds,
-        isExamFinished: false,
-        timestamp: Date.now(),
-      };
-      localStorage.setItem(LOCAL_DRAFT_EXAM_KEY, JSON.stringify(draftData));
-    } else if (screen !== 'quiz' || isExamFinished) {
-      localStorage.removeItem(LOCAL_DRAFT_EXAM_KEY);
-    }
-  }, [screen, isExamFinished, activeQuestions, currentIndex, answers, eliminated, flagged, timeSpentSeconds, currentSubjectId, quizMode]);
 
   useEffect(() => {
     const checkDay = () => setIsDay(isDayTime());
@@ -262,48 +202,19 @@ export default function App() {
     document.documentElement.classList.add(`font-${fontSize}`);
   }, [fontSize]);
 
-  const handleChangeThemeMode = (mode: ThemeMode) => {
-    setThemeMode(mode);
-    setSavedThemeMode(mode);
-  };
-
-  const handleToggleTheme = () => {
-    const nextMode: ThemeMode = effectiveDarkMode ? 'light' : 'dark';
-    handleChangeThemeMode(nextMode);
-  };
-
-  const handleDecreaseFontSize = () => {
-    const newSize: FontSizePreference = fontSize === 'large' ? 'normal' : 'small';
-    setFontSize(newSize);
-    setSavedFontSize(newSize);
-  };
-
-  const handleIncreaseFontSize = () => {
-    const newSize: FontSizePreference = fontSize === 'small' ? 'normal' : 'large';
-    setFontSize(newSize);
-    setSavedFontSize(newSize);
-  };
-
-  const wrongQuestionsMap = useMemo(() => {
-    return getWrongQuestions();
-  }, [storageVersion, answers]);
+  const wrongQuestionsMap = useMemo(() => getWrongQuestions(), [storageVersion, answers]);
   const wrongCount = Object.keys(wrongQuestionsMap).length;
 
-  const history = useMemo(() => {
-    return getQuizHistory();
-  }, [storageVersion, screen]);
-
+  const history = useMemo(() => getQuizHistory(), [storageVersion, screen]);
   const totalAnsweredCount = history.reduce((acc, h) => acc + h.answeredCount, 0);
   const totalCorrectCount = history.reduce((acc, h) => acc + h.correctCount, 0);
   const overallAccuracy = totalAnsweredCount > 0 ? (totalCorrectCount / totalAnsweredCount) * 100 : 0;
 
   useEffect(() => {
     if (screen !== 'quiz' || isExamFinished || isTimerPaused) return;
-
     const interval = setInterval(() => {
       setTimeSpentSeconds((prev) => prev + 1);
     }, 1000);
-
     return () => clearInterval(interval);
   }, [screen, isExamFinished, isTimerPaused]);
 
@@ -312,12 +223,14 @@ export default function App() {
       setIsAuthOpen(true);
       return;
     }
+
+    // Se o usuário não tiver acesso liberado, abre o Paywall imediatamente!
     if (!isUserAccessAllowed(currentUser)) {
+      setIsPaywallOpen(true);
       return;
     }
 
     let questionsPool: Question[] = [];
-
     if (mode === 'mistakes') {
       const wrongIds = new Set(Object.keys(wrongQuestionsMap));
       const all: Question[] = [];
@@ -340,9 +253,7 @@ export default function App() {
       questionsPool = questionsPool.slice(0, questionLimit);
     }
 
-    if (questionsPool.length === 0) {
-      return;
-    }
+    if (questionsPool.length === 0) return;
 
     setCurrentSubjectId(subjectId);
     setQuizMode(mode);
@@ -359,7 +270,6 @@ export default function App() {
 
   const handleSelectAnswer = useCallback((option: OptionKey) => {
     if (isExamFinished) return;
-
     const currentQ = activeQuestionsRef.current[currentIndex];
     if (!currentQ) return;
 
@@ -374,7 +284,6 @@ export default function App() {
   const handleToggleEliminate = useCallback((option: OptionKey) => {
     const currentQ = activeQuestionsRef.current[currentIndex];
     if (!currentQ) return;
-
     setEliminated((prev) => {
       const currentElim = prev[currentQ.id] || [];
       const updated = currentElim.includes(option)
@@ -387,7 +296,6 @@ export default function App() {
   const handleToggleFlag = useCallback(() => {
     const currentQ = activeQuestionsRef.current[currentIndex];
     if (!currentQ) return;
-
     setFlagged((prev) => ({
       ...prev,
       [currentQ.id]: !prev[currentQ.id],
@@ -403,11 +311,8 @@ export default function App() {
     let wrong = 0;
     activeQuestions.forEach((q) => {
       const userAns = answers[q.id];
-      if (userAns === q.correctAnswer) {
-        correct++;
-      } else if (userAns) {
-        wrong++;
-      }
+      if (userAns === q.correctAnswer) correct++;
+      else if (userAns) wrong++;
     });
 
     const subInfo = subjectsList.find((s) => s.id === currentSubjectId);
@@ -426,50 +331,8 @@ export default function App() {
     };
 
     saveQuizHistory(historyEntry);
-
-    const studentUid = currentUser?.uid || currentUser?.id;
-    if (studentUid) {
-      recordUserAttempt(studentUid, {
-        subjectId: currentSubjectId,
-        subjectTitle: subInfo ? subInfo.title : 'Simulado CFC - SAD',
-        score: correct,
-        totalQuestions: activeQuestions.length,
-        percentage: activeQuestions.length > 0 ? (correct / activeQuestions.length) * 100 : 0,
-        timeSpentSeconds,
-        answersCount: Object.keys(answers).length,
-        errorsCount: wrong,
-      });
-    }
-
     setStorageVersion((v) => v + 1);
     setScreen('result');
-  };
-
-  const handleRetryErrorsOnly = () => {
-    const wrongQs = activeQuestions.filter((q) => answers[q.id] && answers[q.id] !== q.correctAnswer);
-    if (wrongQs.length === 0) {
-      setScreen('home');
-      return;
-    }
-    setActiveQuestions(wrongQs);
-    setCurrentIndex(0);
-    setAnswers({});
-    setEliminated({});
-    setFlagged({});
-    setIsExamFinished(false);
-    setTimeSpentSeconds(0);
-    setQuizMode('study');
-    setScreen('quiz');
-  };
-
-  const handleRestartCurrent = () => {
-    setCurrentIndex(0);
-    setAnswers({});
-    setEliminated({});
-    setFlagged({});
-    setIsExamFinished(false);
-    setTimeSpentSeconds(0);
-    setScreen('quiz');
   };
 
   const currentSubjectInfo = useMemo(() => {
@@ -481,7 +344,8 @@ export default function App() {
   const progressPercent = activeQuestions.length > 0 ? (answeredTotal / activeQuestions.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors selection:bg-[#002D62] selection:text-white">
+    <div className="min-h-screen w-full bg-[#F8FAFC] dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors selection:bg-[#002D62] selection:text-white overflow-x-hidden">
+      
       {/* Top Bar Institucional FAB */}
       <Header
         onGoHome={() => setScreen('home')}
@@ -494,15 +358,15 @@ export default function App() {
         onLogout={() => setCurrentUser(null)}
         themeMode={themeMode}
         effectiveDarkMode={effectiveDarkMode}
-        onToggleTheme={handleToggleTheme}
+        onToggleTheme={() => setThemeMode(effectiveDarkMode ? 'light' : 'dark')}
         fontSize={fontSize}
-        onDecreaseFontSize={handleDecreaseFontSize}
-        onIncreaseFontSize={handleIncreaseFontSize}
+        onDecreaseFontSize={() => setFontSize('small')}
+        onIncreaseFontSize={() => setFontSize('large')}
       />
 
       {/* Botão Flutuante de Acesso Exclusivo do Administrador */}
       {isAdmin && (
-        <div className="bg-[#002D62] border-b border-blue-900 px-4 py-2 flex items-center justify-between text-xs text-white">
+        <div className="bg-[#002D62] border-b border-blue-900 px-4 py-2 flex items-center justify-between text-xs text-white w-full">
           <div className="flex items-center gap-2 font-medium">
             <Shield className="w-4 h-4 text-[#D4AF37]" />
             <span>Painel Administrativo do Proprietário Ativo</span>
@@ -517,8 +381,8 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Content Area - Otimizado com largura fluida */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Main Content Area - 100% Responsivo e Fluido em Celulares */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {screen === 'home' && (
           <SubjectSelector
             onStartQuiz={handleStartQuiz}
@@ -532,15 +396,12 @@ export default function App() {
         )}
 
         {screen === 'quiz' && currentQuestion && (
-          <div className="space-y-6 pb-20">
-            {/* Barra de Status e Controle da Prova */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#0B192C] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-4 sm:space-y-6 pb-20 w-full">
+            <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-[#0B192C] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setScreen('home')}
                   className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-                  title="Voltar ao menu inicial"
-                  aria-label="Voltar ao menu inicial"
                 >
                   <Home className="w-5 h-5" />
                 </button>
@@ -552,62 +413,30 @@ export default function App() {
                     <span className="font-mono">
                       {answeredTotal} de {activeQuestions.length} respondidas ({progressPercent.toFixed(0)}%)
                     </span>
-                    <span>&middot;</span>
-                    <span className="uppercase text-[10px] tracking-wider font-semibold text-[#002D62] dark:text-blue-400">
-                      {quizMode === 'exam' ? 'Modo Prova' : quizMode === 'mistakes' ? 'Caderno de Erros' : 'Modo Estudo'}
-                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                {quizMode === 'exam' && (
-                  <ExamTimer
-                    initialSeconds={activeQuestions.length * 90}
-                    onTimeExpired={handleFinishExam}
-                    isPaused={isTimerPaused}
-                    onTogglePause={() => setIsTimerPaused(!isTimerPaused)}
-                  />
-                )}
-
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsChatOpen(true)}
-                  className="p-2 text-[#002D62] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-bold border border-blue-200 dark:border-blue-800"
-                  title="Tirar dúvida sobre esta questão"
+                  className="p-2 text-[#002D62] dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 rounded-xl flex items-center gap-1.5 text-xs font-bold border border-blue-200 dark:border-blue-800"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span className="hidden sm:inline">Dúvida com IA</span>
                 </button>
-
-                <button
-                  onClick={() => setIsGridOpenMobile(!isGridOpenMobile)}
-                  className="lg:hidden p-2 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-semibold"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                  <span>Grade</span>
-                </button>
-
                 <button
                   onClick={() => setShowFinishConfirm(true)}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-colors"
+                  className="px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  <span>Entregar Simulado</span>
+                  <span>Entregar</span>
                 </button>
               </div>
             </div>
 
-            {/* Barra de Progresso */}
-            <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-[#002D62] to-[#D4AF37] h-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            {/* Layout 2 Colunas */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <div className="lg:col-span-8 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
+              <div className="lg:col-span-8 space-y-6 w-full">
                 <QuestionCard
                   question={currentQuestion}
                   currentIndex={currentIndex}
@@ -621,48 +450,7 @@ export default function App() {
                   mode={quizMode}
                   isExamFinished={isExamFinished}
                   fontSize={fontSize}
-                  onAskAI={(q) => {
-                    setQuestionToExplain(q);
-                    setIsChatOpen(true);
-                  }}
-                />
-
-                <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#0B192C] border border-slate-200 dark:border-slate-800">
-                  <button
-                    onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-                    disabled={currentIndex === 0}
-                    className="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Anterior
-                  </button>
-
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-                      {currentIndex + 1} / {activeQuestions.length}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => setCurrentIndex((prev) => Math.min(activeQuestions.length - 1, prev + 1))}
-                    disabled={currentIndex === activeQuestions.length - 1}
-                    className="py-2.5 px-4 rounded-xl bg-[#002D62] hover:bg-blue-900 text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Próxima
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24">
-                <QuestionGrid
-                  questions={activeQuestions}
-                  currentIndex={currentIndex}
-                  onSelectIndex={(idx) => setCurrentIndex(idx)}
-                  answers={answers}
-                  flagged={flagged}
-                  mode={quizMode}
-                  isExamFinished={isExamFinished}
+                  onAskAI={(q) => setIsChatOpen(true)}
                 />
               </div>
             </div>
@@ -675,8 +463,8 @@ export default function App() {
             answers={answers}
             subjectInfo={currentSubjectInfo}
             timeSpentSeconds={timeSpentSeconds}
-            onRestart={handleRestartCurrent}
-            onRetryErrors={handleRetryErrorsOnly}
+            onRestart={() => setScreen('quiz')}
+            onRetryErrors={() => setScreen('quiz')}
             onGoHome={() => setScreen('home')}
             currentUser={currentUser}
             onOpenRanking={() => setIsRankingOpen(true)}
@@ -685,7 +473,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Modais e Painel Admin */}
+      {/* Modais do Sistema */}
       {isAuthOpen && (
         <AuthModal
           isOpen={isAuthOpen}
@@ -693,6 +481,23 @@ export default function App() {
           onSuccess={(profile) => {
             setCurrentUser(profile);
             setIsAuthOpen(false);
+          }}
+        />
+      )}
+
+      {isPaywallOpen && currentUser && (
+        <PaywallModal
+          profile={currentUser}
+          onRefresh={() => {
+            setIsPaywallOpen(false);
+          }}
+          onLogout={() => {
+            setCurrentUser(null);
+            setIsPaywallOpen(false);
+          }}
+          onAccessGranted={(updated) => {
+            setCurrentUser(updated);
+            setIsPaywallOpen(false);
           }}
         />
       )}
