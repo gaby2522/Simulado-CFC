@@ -37,6 +37,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
   const [keyMessage, setKeyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showKeyInput, setShowKeyInput] = useState(false);
 
+  // SEU NÚMERO DE WHATSAPP REAL (21) 99652-4424
+  const WHATSAPP_PHONE = '5521996524424';
+  const whatsappMsg = encodeURIComponent("Olá! Acabei de adquirir o Simulado CFC - SAD no Mercado Pago (R$ 19,90) e gostaria de confirmar a liberação do meu acesso.");
+  const directWhatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${whatsappMsg}`;
+
   const handleValidateKey = async (e: React.FormEvent) => {
     e.preventDefault();
     setKeyMessage(null);
@@ -64,19 +69,19 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto w-full h-full">
       {/* Imagem de Fundo Imersiva de Elite (Gripen F-39 da FAB) */}
       <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500 scale-102"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
         style={{ backgroundImage: `url(${fabGripenFighter})` }}
       />
       {/* Camada escura de sobreposição militar e leve desfoque */}
       <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xs" />
 
-      {/* Conteúdo do Modal */}
-      <div className="relative z-10 bg-[#0F172A] w-full max-w-xl rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col my-auto text-slate-100">
+      {/* Conteúdo do Modal - Responsividade Fluida */}
+      <div className="relative z-10 bg-[#0F172A] w-full max-w-lg rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col my-auto text-slate-100">
         {/* Top Header Tático FAB */}
-        <div className="p-5 sm:p-6 bg-gradient-to-r from-[#002D62] via-[#0B192C] to-[#0F172A] text-white flex items-center justify-between border-b border-[#D4AF37]/40">
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-[#002D62] via-[#0B192C] to-[#0F172A] text-white flex items-center justify-between border-b border-[#D4AF37]/40">
           <div className="flex items-center gap-3">
             <FabBadge size="md" />
             <div>
@@ -102,7 +107,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
         </div>
 
         {/* Corpo do Paywall / Vendas */}
-        <div className="p-5 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[80vh] overflow-y-auto">
           {/* Banner de Identificação do Aluno */}
           <div className="p-3.5 rounded-xl bg-blue-950/40 border border-blue-800/60 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2.5">
@@ -111,7 +116,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
               </div>
               <div>
                 <p className="font-bold text-white">{profile.name}</p>
-                <p className="text-slate-400 font-mono text-[11px] truncate max-w-[200px] sm:max-w-xs">
+                <p className="text-slate-400 font-mono text-[11px] truncate max-w-[180px] sm:max-w-xs">
                   {profile.email}
                 </p>
               </div>
@@ -169,7 +174,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
               href={PAYMENT_CONFIG.checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-4 px-5 rounded-xl font-black text-sm sm:text-base text-white bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2.5 transition-all transform hover:scale-[1.01] active:scale-[0.99] border border-blue-400/30"
+              className="w-full py-3.5 sm:py-4 px-5 rounded-xl font-black text-sm sm:text-base text-white bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg shadow-blue-900/40 flex items-center justify-center gap-2.5 transition-all transform hover:scale-[1.01] active:scale-[0.99] border border-blue-400/30"
             >
               <Lock className="w-4 h-4" />
               <span>Liberar Acesso Completo - {PAYMENT_CONFIG.priceFormatted}</span>
@@ -258,7 +263,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
           {/* Links de Suporte e Ações Secundárias */}
           <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <a
-              href={PAYMENT_CONFIG.whatsappSupportUrl}
+              href={directWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 font-semibold transition-colors"
