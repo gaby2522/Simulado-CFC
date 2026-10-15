@@ -4,7 +4,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
   sendPasswordResetEmail,
   User as FirebaseUser
 } from 'firebase/auth';
@@ -217,7 +216,6 @@ export async function loginStudent(
         updatedAt: serverTimestamp()
       });
     } else {
-      // Criação inicial se logou mas o documento no firestore ainda não existia
       profile = {
         uid: user.uid,
         id: user.uid,
@@ -256,7 +254,7 @@ export async function loginStudent(
   return { user, profile };
 }
 
-// 6. LOGIN DEMO / MODO DE CONTINGÊNCIA (Resolução para quando Auth Console ainda não ativou E-mail/Senha)
+// 6. LOGIN DEMO / MODO DE CONTINGÊNCIA
 export function loginDemoStudent(hasFullAccess: boolean = false): UserProfile {
   const sessionId = generateNewSessionId();
   const demoProfile: UserProfile = {
@@ -308,12 +306,10 @@ export function getSavedDemoStudent(): UserProfile | null {
   }
 }
 
-// Redefinição de senha
 export async function sendStudentPasswordReset(email: string): Promise<void> {
   await sendPasswordResetEmail(auth, email.trim());
 }
 
-// Logout
 export async function logoutStudent(): Promise<void> {
   try {
     await signOut(auth);
@@ -335,7 +331,6 @@ export async function activateUserWithKey(
     return { success: false, message: 'Por favor, informe a chave ou código de liberação.' };
   }
 
-  // Verifica se a chave é válida ou se contém formato de comprovante
   const isValid = VALID_ACTIVATION_KEYS.has(cleanKey) ||
     cleanKey.startsWith('CFC-') ||
     cleanKey.startsWith('MP-') ||
@@ -348,7 +343,6 @@ export async function activateUserWithKey(
     };
   }
 
-  // Atualiza no Firestore se não for usuário puramente local
   try {
     if (user.uid && !user.uid.startsWith('demo_')) {
       const userDocRef = doc(db, 'users', user.uid);
@@ -372,7 +366,6 @@ export async function activateUserWithKey(
     updatedAt: new Date().toISOString()
   };
 
-  // Se for demo, atualiza no storage
   if (user.uid.startsWith('demo_')) {
     localStorage.setItem(DEMO_USER_STORAGE_KEY, JSON.stringify(updatedProfile));
   }
@@ -416,10 +409,8 @@ export function subscribeToUserSession(
           updatedAt: data.updatedAt
         };
 
-        // Atualização em tempo real: se admin mudar hasAccess para true, o app desbloqueia na hora
         onProfileUpdate(normalizedProfile);
 
-        // Proteção antifraude de sessão única
         const localSession = localStorage.getItem(SESSION_STORAGE_KEY);
         if (localSession && data.activeSessionId && data.activeSessionId !== localSession) {
           onSessionTerminated(
