@@ -84,6 +84,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         setSuccessMsg('E-mail de recuperação enviado com sucesso!');
       }
     } catch (err: any) {
+      console.error('Erro no submit:', err);
       setErrorMsg('Erro ao processar autenticação. Utilize o botão de Aluno Teste abaixo.');
     } finally {
       setLoading(false);
