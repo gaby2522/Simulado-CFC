@@ -137,7 +137,7 @@ export function isUserAccessAllowed(profile: UserProfile | null): boolean {
   return profile.hasAccess === true || profile.active === true || profile.ativo === true;
 }
 
-// 4. CADASTRO DE ALUNO (Modo Autônomo e Definitivo - Sem Erros de API Key)
+// 4. CADASTRO DE ALUNO (100% Autónomo - Sem chamadas externas quebradas)
 export async function registerStudent(
   name: string,
   email: string,
@@ -154,9 +154,9 @@ export async function registerStudent(
     id: safeId,
     email: cleanEmail,
     name: cleanName,
-    hasAccess: isAdminUser ? true : true, // Acesso liberado para testes e uso imediato
-    active: true,
-    ativo: true,
+    hasAccess: isAdminUser ? true : false, // Alunos novos começam sem acesso (Paywall R$ 19,90), admin tem acesso total
+    active: isAdminUser,
+    ativo: isAdminUser,
     activeSessionId: newSessionId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -167,7 +167,7 @@ export async function registerStudent(
   return { user: { uid: safeId, email: cleanEmail }, profile };
 }
 
-// 5. LOGIN DE ALUNO (Modo Autônomo e Definitivo - Sem Erros de API Key)
+// 5. LOGIN DE ALUNO (100% Autónomo - Sem chamadas externas quebradas)
 export async function loginStudent(
   email: string,
   pass: string
@@ -182,9 +182,9 @@ export async function loginStudent(
     id: safeId,
     email: cleanEmail,
     name: isAdminUser ? 'Pedro Henrique Guedes Alves Ferreira (Admin)' : cleanEmail.split('@')[0],
-    hasAccess: true, // Acesso total liberado
-    active: true,
-    ativo: true,
+    hasAccess: isAdminUser ? true : false, // Apenas admin ou contas ativas entram direto
+    active: isAdminUser,
+    ativo: isAdminUser,
     activeSessionId: newSessionId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
