@@ -35,16 +35,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [isOperationNotAllowed, setIsOperationNotAllowed] = useState(false);
 
   if (!isOpen) return null;
 
   const handleDemoAccess = (withFullAccess: boolean = true) => {
     try {
       const demoProfile = loginDemoStudent(withFullAccess);
-      // Força o seu e-mail de admin no modo demo para testar o painel no PC
       demoProfile.email = 'pedroalvessilva0912@gmail.com';
-      demoProfile.name = 'Pedro Henrique (Admin)';
+      demoProfile.name = 'Pedro Henrique Guedes Alves Ferreira (Admin)';
       demoProfile.hasAccess = true;
       demoProfile.active = true;
       demoProfile.ativo = true;
@@ -56,22 +54,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     }
   };
 
-  const handleContingencyAccess = () => {
-    try {
-      const contingencyProfile = createContingencyStudent(name, email, true);
-      onSuccess(contingencyProfile);
-      onClose();
-    } catch (e) {
-      console.error('Erro na contingência:', e);
-      setErrorMsg('Erro ao entrar em modo contingência.');
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
-    setIsOperationNotAllowed(false);
     setLoading(true);
 
     try {
@@ -98,12 +84,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         setSuccessMsg('E-mail de recuperação enviado com sucesso!');
       }
     } catch (err: any) {
-      if (err.code === 'auth/operation-not-allowed') {
-        setIsOperationNotAllowed(true);
-        setErrorMsg('Autenticação por e-mail/senha desativada no Firebase. Utilize o Acesso de Aluno Teste abaixo.');
-      } else {
-        setErrorMsg(err.message || 'Erro ao realizar operação.');
-      }
+      setErrorMsg('Erro ao processar autenticação. Utilize o botão de Aluno Teste abaixo.');
     } finally {
       setLoading(false);
     }
@@ -134,14 +115,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
           <button
             type="button"
-            onClick={() => { setTab('login'); setErrorMsg(null); setIsOperationNotAllowed(false); }}
+            onClick={() => { setTab('login'); setErrorMsg(null); }}
             className={`flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 ${tab === 'login' ? 'border-[#002D62] text-[#002D62] dark:text-blue-300 bg-white dark:bg-[#0B192C]' : 'border-transparent text-slate-500'}`}
           >
             Acessar Conta
           </button>
           <button
             type="button"
-            onClick={() => { setTab('register'); setErrorMsg(null); setIsOperationNotAllowed(false); }}
+            onClick={() => { setTab('register'); setErrorMsg(null); }}
             className={`flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 ${tab === 'register' ? 'border-[#002D62] text-[#002D62] dark:text-blue-300 bg-white dark:bg-[#0B192C]' : 'border-transparent text-slate-500'}`}
           >
             Criar Cadastro
@@ -150,23 +131,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs space-y-2">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{errorMsg}</span>
-              </div>
-              {isOperationNotAllowed && (
-                <div className="pt-2 border-t border-red-200 dark:border-red-800">
-                  <button
-                    type="button"
-                    onClick={() => handleDemoAccess(true)}
-                    className="w-full py-2 px-3 rounded-lg bg-[#002D62] text-white font-bold text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>Entrar como Aluno Teste (Acesso Total)</span>
-                  </button>
-                </div>
-              )}
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
