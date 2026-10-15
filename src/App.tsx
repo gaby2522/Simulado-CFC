@@ -224,7 +224,6 @@ export default function App() {
       return;
     }
 
-    // Se o usuário não tiver acesso liberado, abre o Paywall imediatamente!
     if (!isUserAccessAllowed(currentUser)) {
       setIsPaywallOpen(true);
       return;
@@ -381,7 +380,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Content Area - 100% Responsivo e Fluido em Celulares */}
+      {/* Main Content Area */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {screen === 'home' && (
           <SubjectSelector
