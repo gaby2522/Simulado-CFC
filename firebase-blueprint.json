@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Perfil do aluno no Simulado CFC - SAD, com uid, e-mail, nome, hasAccess e controle de sessão",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "UID do usuário" },
+        "id": { "type": "string", "description": "UID do usuário" },
+        "email": { "type": "string", "format": "email", "description": "E-mail do aluno" },
+        "name": { "type": "string", "description": "Nome completo ou nome de guerra do aluno" },
+        "hasAccess": { "type": "boolean", "description": "Status de liberação do acesso aos simulados (R$ 19,90 vitalício)" },
+        "active": { "type": "boolean", "description": "Compatibilidade com campo active" },
+        "ativo": { "type": "boolean", "description": "Compatibilidade com campo ativo" },
+        "activeSessionId": { "type": "string", "description": "Identificador da sessão ativa única" },
+        "createdAt": { "type": "string", "description": "Timestamp de criação" },
+        "updatedAt": { "type": "string", "description": "Timestamp de atualização" }
+      },
+      "required": ["email", "name", "hasAccess"]
+    },
+    "Attempt": {
+      "title": "Attempt",
+      "description": "Tentativa de simulado concluída pelo aluno com métricas e detalhes por disciplina",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID da tentativa" },
+        "subjectId": { "type": "string", "description": "ID da disciplina ou simulado_geral" },
+        "subjectTitle": { "type": "string", "description": "Título da disciplina" },
+        "score": { "type": "number", "description": "Quantidade de acertos" },
+        "totalQuestions": { "type": "number", "description": "Total de questões" },
+        "percentage": { "type": "number", "description": "Aproveitamento em porcentagem" },
+        "timeSpentSeconds": { "type": "number", "description": "Tempo total gasto em segundos" },
+        "date": { "type": "string", "description": "Data ISO da tentativa" }
+      },
+      "required": ["id", "score", "totalQuestions", "percentage", "date"]
+    },
+    "RankingEntry": {
+      "title": "RankingEntry",
+      "description": "Entrada pública do ranking oficial da semana",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Identificador único da pontuação" },
+        "userId": { "type": "string", "description": "UID do aluno" },
+        "userName": { "type": "string", "description": "Nome do aluno" },
+        "userEmail": { "type": "string", "description": "E-mail do aluno" },
+        "score": { "type": "number", "description": "Acertos" },
+        "totalQuestions": { "type": "number", "description": "Total de questões" },
+        "percentage": { "type": "number", "description": "Percentual de acerto" },
+        "timeSpentSeconds": { "type": "number", "description": "Tempo em segundos" },
+        "examTitle": { "type": "string", "description": "Título da prova" },
+        "completedAt": { "type": "string", "description": "Data ISO de conclusão" }
+      },
+      "required": ["id", "userId", "userName", "score", "totalQuestions", "percentage", "timeSpentSeconds", "completedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Documento de perfil e controle de acesso do aluno"
+    },
+    "/users/{userId}/attempts/{attemptId}": {
+      "schema": "Attempt",
+      "description": "Subcoleção de tentativas individuais de simulados do aluno"
+    },
+    "/rankings/{rankingId}": {
+      "schema": "RankingEntry",
+      "description": "Quadro de líderes público do simulado oficial da semana"
+    }
+  }
+}

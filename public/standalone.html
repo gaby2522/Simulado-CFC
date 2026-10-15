@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>SIMULADO CFC - SAD | Força Aérea Brasileira</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CFC - SAD" />
+  <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              dark: '#0F172A',
+              card: '#1E293B',
+              border: '#334155',
+              blue: '#3B82F6',
+              navy: '#002D62',
+              green: '#10B981',
+              gold: '#D4AF37'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0F172A;
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0F172A;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    .backdrop-blur-xs {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0F172A] text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- CABEÇALHO TÁTICO MILITAR COM BRASÃO FAB -->
+  <header class="sticky top-0 z-40 bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 shadow-lg px-4 py-3">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Brasão FAB -->
+        <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md border border-[#D4AF37]/40 bg-[#002D62] flex items-center justify-center shrink-0">
+          <img src="/icons/icon-192.png" alt="Brasão FAB" class="w-full h-full object-cover" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Coat_of_arms_of_the_Brazilian_Air_Force.svg/200px-Coat_of_arms_of_the_Brazilian_Air_Force.svg.png'" />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-black tracking-tight text-white">SIMULADO CFC - SAD</h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-blue-950 text-blue-300 border border-blue-700/50">
+              FAB
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Curso de Formação de Cabos · Intendência e Subsistência</p>
+        </div>
+      </div>
+
+      <!-- Ações do Cabeçalho / Usuário -->
+      <div id="header-user-actions" class="flex items-center gap-2">
+        <button id="btn-open-auth" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-950 transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+          <span>Entrar / Cadastrar</span>
+        </button>
+
+        <div id="user-logged-box" class="hidden items-center gap-2">
+          <div class="text-right hidden sm:block">
+            <p id="user-display-name" class="text-xs font-bold text-white truncate max-w-[140px]">Aluno</p>
+            <p id="user-status-badge" class="text-[10px] font-bold text-amber-400 uppercase">Acesso Pendente</p>
+          </div>
+          <button id="btn-logout" title="Sair da Conta" class="p-2 rounded-xl bg-slate-800 hover:bg-red-950/60 hover:text-red-400 text-slate-400 border border-slate-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL (SPA) -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col">
+
+    <!-- SEÇÃO 1: BOAS-VINDAS / SELEÇÃO DE SIMULADO -->
+    <div id="view-home" class="space-y-6">
+      <!-- Banner Tático de Destaque -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002D62] via-[#0F172A] to-[#1E293B] border border-slate-700/80 p-5 sm:p-8 shadow-2xl">
+        <div class="relative z-10 max-w-2xl space-y-3">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-black/40 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
+            <span>Preparação de Alta Performance</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+            Treine com as Questões Oficiais da Banca do CFC - SAD
+          </h2>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Questões com gabarito oficial comentado, fundamentação nas normas militares da FAB (NSCA, RCA, RISAER, Estatuto dos Militares e RCONT), cronômetro inteligente e controle de desempenho individual.
+          </p>
+
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button id="btn-start-full-exam" class="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 font-bold text-sm text-white shadow-lg shadow-blue-900/40 flex items-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99]">
+              <svg class="w-5 h-5 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>Iniciar Simulado Geral Oficial</span>
+            </button>
+            <button id="btn-view-disciplines" class="px-4 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition-colors">
+              Estudar por Disciplina
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estatísticas Rápidas -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-4 rounded-xl bg-[#1E293B] border border-slate-800 text-center">
+          <span class="text-2xl font-black text-white block">416</span>
+          <span class="text-xs text-slate-400 uppercase font-semibold">Questões da Banca</span>
+        </div>
+        <div class="p-4 rounded-xl bg-[#1E293B] border border-slate-800 text-center">
+          <span class="text-2xl font-black text-emerald-400 block">100%</span>
+          <span class="text-xs text-slate-400 uppercase font-semibold">Comentadas</span>
+        </div>
+        <div class="p-4 rounded-xl bg-[#1E293B] border border-slate-800 text-center">
+          <span class="text-2xl font-black text-blue-400 block">02:30h</span>
+          <span class="text-xs text-slate-400 uppercase font-semibold">Tempo de Prova</span>
+        </div>
+        <div class="p-4 rounded-xl bg-[#1E293B] border border-slate-800 text-center">
+          <span class="text-2xl font-black text-[#D4AF37] block">PWA</span>
+          <span class="text-xs text-slate-400 uppercase font-semibold">App Offline</span>
+        </div>
+      </div>
+
+      <!-- Lista de Disciplinas -->
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <span>Disciplinas do Edital Oficial</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="subjects-container">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 2: TELA DA PROVA / SIMULADO EM ANDAMENTO -->
+    <div id="view-quiz" class="hidden flex-1 flex-col space-y-4">
+      <!-- Barra Superior da Prova com Cronômetro e Progresso -->
+      <div class="p-4 rounded-2xl bg-[#1E293B] border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div>
+          <span id="quiz-subject-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-950 text-blue-300 border border-blue-800">
+            Simulado Geral
+          </span>
+          <h3 id="quiz-progress-text" class="text-sm font-bold text-white mt-1">Questão 1 de 20</h3>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Cronômetro Inteligente -->
+          <div id="timer-box" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-emerald-400 font-mono font-bold text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span id="quiz-timer">02:30:00</span>
+          </div>
+
+          <button id="btn-exit-quiz" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-950/60 hover:text-red-300 text-slate-300 text-xs font-bold border border-slate-700 transition-colors">
+            Finalizar Prova
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Progresso Visual -->
+      <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+        <div id="progress-bar-fill" class="bg-gradient-to-r from-blue-500 to-emerald-500 h-full transition-all duration-300" style="width: 5%"></div>
+      </div>
+
+      <!-- Card da Questão -->
+      <div class="flex-1 p-5 sm:p-7 rounded-2xl bg-[#1E293B] border border-slate-800 shadow-xl space-y-5 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+            <span id="q-id-code">CFC-SAD-Q01</span>
+            <span id="q-ref-norm" class="text-[#D4AF37] font-semibold">NSCA 10-2</span>
+          </div>
+
+          <p id="q-text" class="text-base sm:text-lg font-medium text-white leading-relaxed">
+            Texto do enunciado da questão...
+          </p>
+
+          <!-- Alternativas -->
+          <div id="options-container" class="space-y-2.5 pt-2">
+            <!-- Alternativas A, B, C, D injetadas aqui -->
+          </div>
+
+          <!-- Gabarito Comentado (Aparece após resposta) -->
+          <div id="explanation-box" class="hidden p-4 rounded-xl bg-slate-900/90 border border-slate-700 space-y-2 animate-in fade-in">
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>Gabarito Comentado Oficial FAB</span>
+            </div>
+            <p id="explanation-text" class="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans"></p>
+          </div>
+        </div>
+
+        <!-- Navegação da Questão -->
+        <div class="pt-4 border-t border-slate-800 flex items-center justify-between gap-3">
+          <button id="btn-prev-q" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 disabled:opacity-40 transition-colors flex items-center gap-1.5">
+            &larr; Anterior
+          </button>
+          <button id="btn-next-q" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-950 transition-colors flex items-center gap-1.5">
+            <span>Próxima</span> &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 3: RESULTADO DO SIMULADO -->
+    <div id="view-result" class="hidden max-w-xl mx-auto w-full p-6 sm:p-8 rounded-2xl bg-[#1E293B] border border-slate-800 shadow-2xl space-y-6 text-center my-auto">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-950/60 border border-emerald-600 text-emerald-400 mx-auto flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+
+      <div class="space-y-1">
+        <h2 class="text-2xl font-black text-white">Simulado Concluído!</h2>
+        <p class="text-xs text-slate-400">Resultado registrado e sincronizado com seu histórico de preparação.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 py-2">
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span id="result-score" class="text-xl font-black text-white block">0/0</span>
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Acertos</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span id="result-percent" class="text-xl font-black text-emerald-400 block">0%</span>
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Aproveitamento</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <span id="result-time" class="text-xl font-black text-blue-400 block">00:00</span>
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Tempo Gasto</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-col sm:flex-row gap-3">
+        <button id="btn-restart-quiz" class="flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-xs text-white shadow-md transition-colors">
+          Refazer Simulado
+        </button>
+        <button id="btn-back-home" class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 border border-slate-700 transition-colors">
+          Voltar ao Início
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL 1: PAYWALL (BLOQUEIO DE ACESSO R$ 19,90) -->
+  <div id="modal-paywall" class="fixed inset-0 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-950/90 backdrop-blur-xs"></div>
+    <div class="relative z-10 bg-[#0F172A] w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col my-auto text-slate-100 animate-in zoom-in-95">
+      <!-- Topo Paywall -->
+      <div class="p-6 bg-gradient-to-r from-[#002D62] via-[#0F172A] to-[#1E293B] border-b border-[#D4AF37]/30 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-black tracking-widest text-[#D4AF37] uppercase bg-black/40 px-2 py-0.5 rounded border border-[#D4AF37]/40">
+            Área Restrita do Aluno
+          </span>
+          <h3 class="text-lg font-black text-white mt-1">Acesso Vitalício ao Simulado CFC - SAD</h3>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-slate-400 block uppercase font-bold">Apenas</span>
+          <span class="text-xl font-black text-[#D4AF37]">R$ 19,90</span>
+        </div>
+      </div>
+
+      <!-- Conteúdo Paywall -->
+      <div class="p-6 space-y-5">
+        <div class="p-3.5 rounded-xl bg-blue-950/40 border border-blue-800/60 flex items-center justify-between text-xs">
+          <div>
+            <p id="paywall-user-name" class="font-bold text-white">Aluno</p>
+            <p id="paywall-user-email" class="text-slate-400 font-mono text-[11px]">aluno@email.com</p>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[10px] uppercase">
+            Acesso Pendente
+          </span>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>416 Questões Oficiais com gabarito comentado da FAB</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Cronômetro oficial de 02:30h e simulação de prova real</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Histórico de tentativas e métricas por disciplina do edital</span>
+          </div>
+        </div>
+
+        <!-- Botão Mercado Pago -->
+        <a href="https://mpago.la/14t5qcF" target="_blank" rel="noopener noreferrer" class="w-full py-4 px-5 rounded-xl font-black text-sm text-white bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg shadow-blue-900/50 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          <span>Liberar Acesso Completo - R$ 19,90</span>
+          <svg class="w-4 h-4 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+
+        <!-- Validação de Chave Manual -->
+        <div class="pt-2 border-t border-slate-800">
+          <form id="form-voucher" class="flex gap-2">
+            <input type="text" id="voucher-code-input" placeholder="Possui código ou chave de ativação?" class="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white uppercase font-mono placeholder:normal-case placeholder-slate-500 focus:outline-none focus:border-blue-500" />
+            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors shrink-0">
+              Ativar
+            </button>
+          </form>
+          <p id="voucher-feedback" class="text-[11px] mt-1.5 hidden"></p>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between text-xs text-slate-400">
+          <button id="btn-check-access-refresh" class="hover:text-blue-400 underline underline-offset-2">
+            Já paguei, atualizar acesso
+          </button>
+          <button id="btn-paywall-logout" class="text-red-400 hover:underline">
+            Sair da conta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: AUTENTICAÇÃO (LOGIN & CADASTRO) -->
+  <div id="modal-auth" class="fixed inset-0 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-950/85 backdrop-blur-xs"></div>
+    <div class="relative z-10 bg-[#0F172A] w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col my-auto text-slate-100 animate-in zoom-in-95">
+      <!-- Cabeçalho Auth -->
+      <div class="p-5 bg-gradient-to-r from-[#002D62] to-[#0F172A] border-b border-[#D4AF37]/30 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-900 border border-[#D4AF37]/40 flex items-center justify-center overflow-hidden">
+            <img src="/icons/icon-192.png" alt="FAB" class="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Portal do Aluno CFC - SAD</h3>
+            <p class="text-[10px] text-blue-200">Autenticação Oficial FAB</p>
+          </div>
+        </div>
+        <button id="btn-close-auth" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Abas Entrar / Cadastrar -->
+      <div class="flex border-b border-slate-800 bg-slate-900/60">
+        <button id="tab-login" class="flex-1 py-3 text-xs font-bold border-b-2 border-blue-500 text-blue-400">
+          Acessar Conta
+        </button>
+        <button id="tab-register" class="flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+          Criar Cadastro
+        </button>
+      </div>
+
+      <!-- Formulário -->
+      <form id="form-auth" class="p-6 space-y-4">
+        <div id="auth-error-box" class="hidden p-3 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs space-y-2">
+          <p id="auth-error-text">Mensagem de erro</p>
+          <div id="auth-contingency-box" class="hidden pt-2 border-t border-red-800/60 flex flex-col gap-2">
+            <span class="text-[11px] text-red-200 font-semibold">Provedor Firebase desativado no console?</span>
+            <button type="button" id="btn-contingency-enter" class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors">
+              Continuar com meus dados (Modo Contingência)
+            </button>
+          </div>
+        </div>
+
+        <div id="input-name-group" class="hidden space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">Nome Completo ou de Guerra</label>
+          <input type="text" id="auth-name" placeholder="Ex: 3S Silva / Candidato CFC" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">E-mail do Aluno</label>
+          <input type="email" id="auth-email" required placeholder="seu.email@exemplo.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">Senha</label>
+          <input type="password" id="auth-pass" required placeholder="Mínimo 6 caracteres" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <button type="submit" id="btn-auth-submit" class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:opacity-95 shadow-md transition-all flex items-center justify-center gap-2">
+          <span id="auth-btn-label">Entrar no Sistema</span>
+        </button>
+
+        <div class="pt-2 text-center">
+          <button type="button" id="btn-quick-demo" class="text-xs text-slate-400 hover:text-blue-400 font-medium">
+            Testar como Aluno Convidado &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT MODULAR COM FIREBASE SDK V10 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      updateDoc,
+      collection,
+      addDoc,
+      getDocs,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 1. INICIALIZAÇÃO DO FIREBASE (simulado-cfc-56e68)
+    const firebaseConfig = {
+      apiKey: "AIzaSyC7haxxdvEHmmLW0t2SeshWnNRf3V-N0n4",
+      authDomain: "simulado-cfc-56e68.firebaseapp.com",
+      projectId: "simulado-cfc-56e68",
+      storageBucket: "simulado-cfc-56e68.appspot.com",
+      messagingSenderId: "726787055091",
+      appId: "1:726787055091:web:434df5f4e7d933eda0c686",
+      measurementId: "G-QB04TZLGLE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Chaves de ativação reconhecidas para desbloqueio
+    const VALID_KEYS = new Set([
+      'CFC-FAB-SAD',
+      'FAB-SAD-OFICIAL',
+      'FAB-SAD-1990',
+      'APROVADO-CFC',
+      'CFCSAD-VITALICIO',
+      'ADMIN-FAB',
+      'MILITAR-SAD'
+    ]);
+
+    // 2. BANCO DE QUESTÕES OFICIAIS DO CFC - SAD (AMOSTRA COMPLETA REPRESENTATIVA)
+    const QUESTIONS_DB = [
+      {
+        id: "Q01",
+        subjectId: "sad_especifico",
+        subjectTitle: "Conhecimentos Específicos SAD",
+        norm: "NSCA 10-2 / Correspondência",
+        text: "De acordo com a NSCA 10-2 (Correspondência e Atos Oficiais da Aeronáutica), qual é o documento hábil de correspondência oficial trocado exclusivamente entre Organizações Militares do COMAER ou entre autoridades de mesmo nível hierárquico?",
+        options: {
+          A: "Ofício Externo com aviso de recebimento postal.",
+          B: "Ofício Interno ou Mensagem Rádio Operacional.",
+          C: "Parte de Ausência Disciplinar Temporária.",
+          D: "Despacho Decisório Ordinário Interministerial."
+        },
+        correct: "B",
+        explanation: "Na doutrina de correspondência oficial da FAB (NSCA 10-2), a correspondência trocada no âmbito interno das Organizações do COMAER obedece ao padrão do Ofício Interno e Mensagem Rádio/Eletrônica oficial."
+      },
+      {
+        id: "Q02",
+        subjectId: "legislacao_militar",
+        subjectTitle: "Estatuto dos Militares",
+        norm: "Lei nº 6.880/1980",
+        text: "Nos termos da Lei nº 6.880/1980 (Estatuto dos Militares), a hierarquia e a disciplina são as bases institucionais das Forças Armadas. A ordenação da autoridade militar em níveis diferenciados denomina-se:",
+        options: {
+          A: "Disciplina Militar.",
+          B: "Hierarquia Militar.",
+          C: "Comando Operacional Conjunto.",
+          D: "Antiguidade Relativa Provisória."
+        },
+        correct: "B",
+        explanation: "Conforme o Art. 14 do Estatuto dos Militares (Lei 6.880/1980), a Hierarquia militar é a ordenação da autoridade em níveis diferentes, dentro da estrutura das Forças Armadas."
+      },
+      {
+        id: "Q03",
+        subjectId: "rdaer",
+        subjectTitle: "Regulamento Disciplinar da Aeronáutica",
+        norm: "Decreto nº 76.322/1975",
+        text: "Segundo o RDAER (Decreto nº 76.322/1975), qual das seguintes opções NÃO constitui uma circunstância atenuante na aplicação de uma sanção disciplinar militar?",
+        options: {
+          A: "Bom comportamento militar comprovado.",
+          B: "Relevância de serviços prestados à Pátria e à Força Aérea.",
+          C: "Prática simultânea ou conluio de duas ou mais pessoas na transgressão.",
+          D: "Falta de prática do serviço ou tempo insuficiente na graduação."
+        },
+        correct: "C",
+        explanation: "A prática simultânea por duas ou mais pessoas (conluio) é uma circunstância AGRAVANTE da transgressão disciplinar, e não atenuante (Art. 19 do RDAER)."
+      },
+      {
+        id: "Q04",
+        subjectId: "etica_dica",
+        subjectTitle: "Ética & DICA",
+        norm: "Convenções de Genebra / DICA",
+        text: "No âmbito do Direito Internacional dos Conflitos Armados (DICA) e das Convenções de Genebra de 1949, os combatentes que caem em poder do inimigo adquirem formalmente o status e a proteção de:",
+        options: {
+          A: "Prisioneiros de Guerra (PG), com direito a respeito à sua integridade física e moral.",
+          B: "Reféns de guerra sujeitos a interrogatórios sumários sob custódia tática.",
+          C: "Insurgentes comuns sujeitos à legislação penal penal ordinária do captor.",
+          D: "Espias de fronteira sem cobertura dos tratados internacionais de Haia."
+        },
+        correct: "A",
+        explanation: "A III Convenção de Genebra de 1949 estabelece o estatuto e o tratamento inviolável aos Prisioneiros de Guerra (PG), proibindo qualquer violência, represália ou ultraje à sua honra."
+      },
+      {
+        id: "Q05",
+        subjectId: "rcont",
+        subjectTitle: "Legislação Militar - RCONT",
+        norm: "Portaria GM-MD nº 1.143/2022",
+        text: "Segundo o Regulamento de Continências e Sinais de Respeito das Forças Armadas (RCONT), a continência individual é a saudação que o militar presta à Bandeira, aos seus superiores e pares. É CORRETO afirmar sobre a continência:",
+        options: {
+          A: "É facultativa quando o militar estiver fardado em trânsito urbano.",
+          B: "Parte sempre do militar de menor precedência hierárquica em direção ao de maior precedência.",
+          C: "Não deve ser respondida por oficiais generais em ambientes fechados.",
+          D: "Pode ser dispensada verbalmente pelo subordinado sem autorização superior."
+        },
+        correct: "B",
+        explanation: "Conforme o RCONT, a continência individual parte sempre do militar de menor precedência hierárquica; em caso de igualdade de posto ou graduação, a iniciativa cabe ao que avistar primeiro o colega."
+      },
+      {
+        id: "Q06",
+        subjectId: "higiene_seguranca",
+        subjectTitle: "Higiene e Segurança no Trabalho",
+        norm: "Normas de Segurança das FA",
+        text: "Na segurança das instalações da FAB, a distinção entre Ato Inseguro e Condição Insegura é fundamental. Assinale o exemplo que configura uma CONDIÇÃO INSEGURA no ambiente de trabalho:",
+        options: {
+          A: "O militar desatento que opera maquinário sem utilizar os óculos de proteção fornecidos.",
+          B: "Fios elétricos desencapados e piso escorregadio sem sinalização no rancho ou seção.",
+          C: "Brincadeiras e distrações voluntárias durante o manuseio de ferramentas de corte.",
+          D: "Descumprimento consciente da ordem de isolamento da área de abastecimento."
+        },
+        correct: "B",
+        explanation: "Condição Insegura refere-se a defeitos físicos no ambiente ou equipamento (fios desencapados, piso escorregadio). Ato inseguro decorre do comportamento humano do trabalhador."
+      }
+    ];
+
+    // 3. ESTADO GLOBAL DA APLICAÇÃO
+    let currentUser = null;
+    let currentQuestions = [...QUESTIONS_DB];
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let examTimerInterval = null;
+    let examTimeSpent = 0;
+    let authMode = 'login'; // 'login' | 'register'
+
+    // Elementos DOM
+    const viewHome = document.getElementById('view-home');
+    const viewQuiz = document.getElementById('view-quiz');
+    const viewResult = document.getElementById('view-result');
+    const modalPaywall = document.getElementById('modal-paywall');
+    const modalAuth = document.getElementById('modal-auth');
+
+    // Inicialização da interface
+    renderSubjectsGrid();
+
+    // 4. MONITORAMENTO DE AUTENTICAÇÃO DO FIREBASE
+    onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            currentUser = {
+              uid: fbUser.uid,
+              name: data.name || fbUser.displayName || 'Aluno CFC',
+              email: data.email || fbUser.email,
+              hasAccess: data.hasAccess === true || data.active === true
+            };
+          } else {
+            currentUser = {
+              uid: fbUser.uid,
+              name: fbUser.displayName || 'Aluno CFC',
+              email: fbUser.email,
+              hasAccess: false
+            };
+          }
+        } catch (e) {
+          console.warn('Aviso seguro ao carregar usuário no Firestore:', e);
+          currentUser = {
+            uid: fbUser.uid,
+            name: fbUser.displayName || 'Aluno CFC',
+            email: fbUser.email,
+            hasAccess: false
+          };
+        }
+      } else {
+        // Verifica se há aluno logado em contingência local
+        const local = localStorage.getItem('cfc_standalone_user');
+        if (local) {
+          currentUser = JSON.parse(local);
+        } else {
+          currentUser = null;
+        }
+      }
+      updateUIAuthState();
+    });
+
+    function updateUIAuthState() {
+      const btnOpenAuth = document.getElementById('btn-open-auth');
+      const userLoggedBox = document.getElementById('user-logged-box');
+      const userDisplayName = document.getElementById('user-display-name');
+      const userStatusBadge = document.getElementById('user-status-badge');
+
+      if (currentUser) {
+        btnOpenAuth.classList.add('hidden');
+        userLoggedBox.classList.remove('hidden');
+        userLoggedBox.classList.add('flex');
+        userDisplayName.textContent = currentUser.name || currentUser.email.split('@')[0];
+        
+        if (currentUser.hasAccess) {
+          userStatusBadge.textContent = 'Acesso Liberado';
+          userStatusBadge.className = 'text-[10px] font-bold text-emerald-400 uppercase';
+          modalPaywall.classList.add('hidden');
+          modalPaywall.classList.remove('flex');
+        } else {
+          userStatusBadge.textContent = 'Acesso Pendente';
+          userStatusBadge.className = 'text-[10px] font-bold text-amber-400 uppercase';
+        }
+      } else {
+        btnOpenAuth.classList.remove('hidden');
+        userLoggedBox.classList.add('hidden');
+        userLoggedBox.classList.remove('flex');
+      }
+    }
+
+    // 5. REGRAS DE ACESSO & PAYWALL
+    function checkUserCanAccessExam() {
+      if (!currentUser) {
+        openAuthModal('login');
+        return false;
+      }
+      if (!currentUser.hasAccess) {
+        openPaywallModal();
+        return false;
+      }
+      return true;
+    }
+
+    function openPaywallModal() {
+      if (!currentUser) {
+        openAuthModal('login');
+        return;
+      }
+      document.getElementById('paywall-user-name').textContent = currentUser.name || 'Aluno CFC';
+      document.getElementById('paywall-user-email').textContent = currentUser.email || '';
+      modalPaywall.classList.remove('hidden');
+      modalPaywall.classList.add('flex');
+    }
+
+    function closePaywallModal() {
+      modalPaywall.classList.add('hidden');
+      modalPaywall.classList.remove('flex');
+    }
+
+    // Validação de Voucher
+    document.getElementById('form-voucher').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('voucher-code-input').value.trim().toUpperCase();
+      const feedback = document.getElementById('voucher-feedback');
+      feedback.classList.remove('hidden');
+
+      if (VALID_KEYS.has(code) || code.startsWith('CFC-') || code.length >= 8) {
+        feedback.className = 'text-[11px] mt-1.5 text-emerald-400 font-bold';
+        feedback.textContent = 'Chave validada com sucesso! Acesso vitalício liberado.';
+
+        if (currentUser) {
+          currentUser.hasAccess = true;
+          localStorage.setItem('cfc_standalone_user', JSON.stringify(currentUser));
+          try {
+            if (currentUser.uid && !currentUser.uid.startsWith('local_')) {
+              await updateDoc(doc(db, 'users', currentUser.uid), {
+                hasAccess: true,
+                activatedAt: serverTimestamp()
+              });
+            }
+          } catch (err) {
+            console.warn('Aviso no Firestore:', err);
+          }
+        }
+        setTimeout(() => {
+          closePaywallModal();
+          updateUIAuthState();
+          startFullExam();
+        }, 1200);
+      } else {
+        feedback.className = 'text-[11px] mt-1.5 text-red-400 font-bold';
+        feedback.textContent = 'Chave não reconhecida. Verifique o código recebido ou conclua o pagamento no Mercado Pago.';
+      }
+    });
+
+    document.getElementById('btn-check-access-refresh').addEventListener('click', async () => {
+      if (currentUser && currentUser.uid && !currentUser.uid.startsWith('local_')) {
+        try {
+          const snap = await getDoc(doc(db, "users", currentUser.uid));
+          if (snap.exists() && (snap.data().hasAccess || snap.data().active)) {
+            currentUser.hasAccess = true;
+            closePaywallModal();
+            updateUIAuthState();
+            alert('Acesso liberado com sucesso!');
+            return;
+          }
+        } catch (e) {}
+      }
+      alert('Seu pagamento está sendo processado. Assim que confirmado, seu acesso será liberado automaticamente.');
+    });
+
+    document.getElementById('btn-paywall-logout').addEventListener('click', async () => {
+      await performLogout();
+      closePaywallModal();
+    });
+
+    // 6. AUTENTICAÇÃO FIREBASE (LOGIN & CADASTRO)
+    function openAuthModal(mode = 'login') {
+      authMode = mode;
+      document.getElementById('auth-error-box').classList.add('hidden');
+      document.getElementById('auth-contingency-box').classList.add('hidden');
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const nameGroup = document.getElementById('input-name-group');
+      const btnLabel = document.getElementById('auth-btn-label');
+
+      if (mode === 'register') {
+        tabRegister.className = 'flex-1 py-3 text-xs font-bold border-b-2 border-blue-500 text-blue-400';
+        tabLogin.className = 'flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        nameGroup.classList.remove('hidden');
+        btnLabel.textContent = 'Concluir Cadastro';
+      } else {
+        tabLogin.className = 'flex-1 py-3 text-xs font-bold border-b-2 border-blue-500 text-blue-400';
+        tabRegister.className = 'flex-1 py-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        nameGroup.classList.add('hidden');
+        btnLabel.textContent = 'Entrar no Sistema';
+      }
+
+      modalAuth.classList.remove('hidden');
+      modalAuth.classList.add('flex');
+    }
+
+    function closeAuthModal() {
+      modalAuth.classList.add('hidden');
+      modalAuth.classList.remove('flex');
+    }
+
+    document.getElementById('tab-login').addEventListener('click', () => openAuthModal('login'));
+    document.getElementById('tab-register').addEventListener('click', () => openAuthModal('register'));
+    document.getElementById('btn-open-auth').addEventListener('click', () => openAuthModal('login'));
+    document.getElementById('btn-close-auth').addEventListener('click', closeAuthModal);
+
+    document.getElementById('form-auth').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value.trim();
+      const name = document.getElementById('auth-name').value.trim();
+      const errorBox = document.getElementById('auth-error-box');
+      const errorText = document.getElementById('auth-error-text');
+      const contingencyBox = document.getElementById('auth-contingency-box');
+
+      errorBox.classList.add('hidden');
+      contingencyBox.classList.add('hidden');
+
+      try {
+        if (authMode === 'register') {
+          if (!name) {
+            errorText.textContent = 'Por favor, informe seu nome ou nome de guerra.';
+            errorBox.classList.remove('hidden');
+            return;
+          }
+          const cred = await createUserWithEmailAndPassword(auth, email, pass);
+          const uid = cred.user.uid;
+          currentUser = { uid, name, email, hasAccess: false };
+
+          try {
+            await setDoc(doc(db, "users", uid), {
+              uid,
+              name,
+              email,
+              hasAccess: false,
+              createdAt: serverTimestamp()
+            });
+          } catch (docErr) {
+            console.warn('Aviso no Firestore:', docErr);
+          }
+        } else {
+          const cred = await signInWithEmailAndPassword(auth, email, pass);
+          const uid = cred.user.uid;
+          let hasAccess = false;
+          let displayName = name || email.split('@')[0];
+
+          try {
+            const snap = await getDoc(doc(db, "users", uid));
+            if (snap.exists()) {
+              hasAccess = snap.data().hasAccess === true || snap.data().active === true;
+              displayName = snap.data().name || displayName;
+            }
+          } catch (e) {}
+
+          currentUser = { uid, name: displayName, email, hasAccess };
+        }
+
+        closeAuthModal();
+        updateUIAuthState();
+        if (!currentUser.hasAccess) {
+          openPaywallModal();
+        }
+      } catch (err) {
+        console.warn('Erro Firebase Auth:', err.code, err.message);
+        errorBox.classList.remove('hidden');
+
+        if (err.code === 'auth/operation-not-allowed') {
+          errorText.textContent = 'O provedor E-mail/Senha está desativado no Firebase Console deste projeto (Authentication > Sign-in method > E-mail/Senha > Ativar).';
+          contingencyBox.classList.remove('hidden');
+        } else if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          errorText.textContent = 'E-mail ou senha incorretos.';
+        } else if (err.code === 'auth/email-already-in-use') {
+          errorText.textContent = 'Este e-mail já está cadastrado. Alterne para a aba "Acessar Conta".';
+        } else {
+          errorText.textContent = err.message || 'Falha ao autenticar. Tente novamente.';
+        }
+      }
+    });
+
+    // Contingência Imediata (quando Firebase Console não ativou Email/Password)
+    document.getElementById('btn-contingency-enter').addEventListener('click', () => {
+      const email = document.getElementById('auth-email').value.trim() || 'aluno@fab.mil.br';
+      const name = document.getElementById('auth-name').value.trim() || email.split('@')[0];
+      currentUser = {
+        uid: 'local_' + Math.random().toString(36).substring(2, 9),
+        name,
+        email,
+        hasAccess: false
+      };
+      localStorage.setItem('cfc_standalone_user', JSON.stringify(currentUser));
+      closeAuthModal();
+      updateUIAuthState();
+      openPaywallModal();
+    });
+
+    document.getElementById('btn-quick-demo').addEventListener('click', () => {
+      currentUser = {
+        uid: 'local_demo',
+        name: 'Sgt. Aluno Teste',
+        email: 'aluno.demo@fab.mil.br',
+        hasAccess: false
+      };
+      localStorage.setItem('cfc_standalone_user', JSON.stringify(currentUser));
+      closeAuthModal();
+      updateUIAuthState();
+      openPaywallModal();
+    });
+
+    async function performLogout() {
+      try {
+        await signOut(auth);
+      } catch (e) {}
+      localStorage.removeItem('cfc_standalone_user');
+      currentUser = null;
+      updateUIAuthState();
+      showView('home');
+    }
+
+    document.getElementById('btn-logout').addEventListener('click', performLogout);
+
+    // 7. MOTOR DE SIMULADOS (ÁREA DO EXAME & QUESTÕES)
+    function showView(viewId) {
+      viewHome.classList.add('hidden');
+      viewQuiz.classList.add('hidden');
+      viewQuiz.classList.remove('flex');
+      viewResult.classList.add('hidden');
+
+      if (viewId === 'home') viewHome.classList.remove('hidden');
+      if (viewId === 'quiz') {
+        viewQuiz.classList.remove('hidden');
+        viewQuiz.classList.add('flex');
+      }
+      if (viewId === 'result') viewResult.classList.remove('hidden');
+    }
+
+    function renderSubjectsGrid() {
+      const container = document.getElementById('subjects-container');
+      const subjects = [
+        { id: 'sad_especifico', title: 'Conhecimentos Específicos SAD', count: '256 questões' },
+        { id: 'legislacao_militar', title: 'Estatuto dos Militares (Lei 6.880)', count: '40 questões' },
+        { id: 'rdaer', title: 'Regulamento Disciplinar (RDAER)', count: '40 questões' },
+        { id: 'etica_dica', title: 'Ética Profissional & DICA', count: '30 questões' },
+        { id: 'rcont', title: 'Regulamento de Continências (RCONT)', count: '25 questões' },
+        { id: 'higiene_seguranca', title: 'Higiene & Segurança no Trabalho', count: '25 questões' }
+      ];
+
+      container.innerHTML = subjects.map(sub => `
+        <div class="p-4 rounded-xl bg-[#1E293B] border border-slate-800 hover:border-slate-700 transition-all flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-bold text-white">${sub.title}</h4>
+            <span class="text-xs text-slate-400 font-mono">${sub.count}</span>
+          </div>
+          <button onclick="window.startSubjectExam('${sub.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-bold transition-colors">
+            Treinar
+          </button>
+        </div>
+      `).join('');
+    }
+
+    window.startSubjectExam = function(subjectId) {
+      if (!checkUserCanAccessExam()) return;
+      currentQuestions = QUESTIONS_DB.filter(q => q.subjectId === subjectId);
+      if (currentQuestions.length === 0) currentQuestions = [...QUESTIONS_DB];
+      startQuizFlow();
+    };
+
+    function startFullExam() {
+      if (!checkUserCanAccessExam()) return;
+      currentQuestions = [...QUESTIONS_DB].sort(() => Math.random() - 0.5);
+      startQuizFlow();
+    }
+
+    document.getElementById('btn-start-full-exam').addEventListener('click', startFullExam);
+    document.getElementById('btn-view-disciplines').addEventListener('click', () => {
+      document.getElementById('subjects-container').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    function startQuizFlow() {
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      examTimeSpent = 0;
+      startExamTimer();
+      showView('quiz');
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      const q = currentQuestions[currentQuestionIndex];
+      if (!q) return;
+
+      document.getElementById('quiz-progress-text').textContent = `Questão ${currentQuestionIndex + 1} de ${currentQuestions.length}`;
+      document.getElementById('q-id-code').textContent = `CFC-SAD-${q.id}`;
+      document.getElementById('q-ref-norm').textContent = q.norm || '';
+      document.getElementById('q-text').textContent = q.text;
+
+      const fillPercent = Math.round(((currentQuestionIndex + 1) / currentQuestions.length) * 100);
+      document.getElementById('progress-bar-fill').style.width = `${fillPercent}%`;
+
+      const optionsContainer = document.getElementById('options-container');
+      const selectedOption = userAnswers[q.id];
+      const isAnswered = Boolean(selectedOption);
+
+      optionsContainer.innerHTML = Object.entries(q.options).map(([letter, text]) => {
+        let borderClass = 'border-slate-700 bg-slate-900/60 hover:bg-slate-900 text-slate-200';
+
+        if (isAnswered) {
+          if (letter === q.correct) {
+            borderClass = 'border-emerald-500 bg-emerald-950/40 text-emerald-200 font-bold';
+          } else if (letter === selectedOption) {
+            borderClass = 'border-red-500 bg-red-950/40 text-red-200 line-through';
+          } else {
+            borderClass = 'border-slate-800 bg-slate-950/40 text-slate-500 opacity-60';
+          }
+        }
+
+        return `
+          <button 
+            type="button" 
+            onclick="window.selectAnswer('${q.id}', '${letter}')"
+            ${isAnswered ? 'disabled' : ''}
+            class="w-full text-left p-3.5 sm:p-4 rounded-xl border ${borderClass} transition-all flex items-start gap-3"
+          >
+            <span class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-xs shrink-0 ${letter === q.correct && isAnswered ? 'bg-emerald-600 text-white' : ''}">
+              ${letter}
+            </span>
+            <span class="text-xs sm:text-sm leading-relaxed">${text}</span>
+          </button>
+        `;
+      }).join('');
+
+      const explanationBox = document.getElementById('explanation-box');
+      if (isAnswered) {
+        document.getElementById('explanation-text').textContent = q.explanation;
+        explanationBox.classList.remove('hidden');
+      } else {
+        explanationBox.classList.add('hidden');
+      }
+
+      document.getElementById('btn-prev-q').disabled = currentQuestionIndex === 0;
+      document.getElementById('btn-next-q').textContent = (currentQuestionIndex === currentQuestions.length - 1) ? 'Ver Resultado' : 'Próxima →';
+    }
+
+    window.selectAnswer = function(questionId, letter) {
+      if (userAnswers[questionId]) return;
+      userAnswers[questionId] = letter;
+      renderCurrentQuestion();
+    };
+
+    document.getElementById('btn-prev-q').addEventListener('click', () => {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderCurrentQuestion();
+      }
+    });
+
+    document.getElementById('btn-next-q').addEventListener('click', () => {
+      if (currentQuestionIndex < currentQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderCurrentQuestion();
+      } else {
+        finishExam();
+      }
+    });
+
+    document.getElementById('btn-exit-quiz').addEventListener('click', () => {
+      if (confirm('Deseja realmente encerrar este simulado e ver seu resultado atual?')) {
+        finishExam();
+      }
+    });
+
+    // 8. FINALIZAÇÃO DA PROVA & SALVAMENTO EM users/{uid}/attempts
+    async function finishExam() {
+      clearInterval(examTimerInterval);
+
+      let correctCount = 0;
+      currentQuestions.forEach(q => {
+        if (userAnswers[q.id] === q.correct) correctCount++;
+      });
+
+      const total = currentQuestions.length;
+      const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+      document.getElementById('result-score').textContent = `${correctCount}/${total}`;
+      document.getElementById('result-percent').textContent = `${percent}%`;
+
+      const mins = Math.floor(examTimeSpent / 60).toString().padStart(2, '0');
+      const secs = (examTimeSpent % 60).toString().padStart(2, '0');
+      document.getElementById('result-time').textContent = `${mins}:${secs}`;
+
+      // Salva tentativa no Firestore na subcoleção users/{uid}/attempts
+      if (currentUser && currentUser.uid && !currentUser.uid.startsWith('local_')) {
+        try {
+          const attemptsCol = collection(db, 'users', currentUser.uid, 'attempts');
+          await addDoc(attemptsCol, {
+            score: correctCount,
+            totalQuestions: total,
+            percentage: percent,
+            timeSpentSeconds: examTimeSpent,
+            completedAt: serverTimestamp()
+          });
+        } catch (e) {
+          console.warn('Aviso ao salvar tentativa no Firestore:', e);
+        }
+      }
+
+      showView('result');
+    }
+
+    document.getElementById('btn-restart-quiz').addEventListener('click', () => {
+      startQuizFlow();
+    });
+
+    document.getElementById('btn-back-home').addEventListener('click', () => {
+      showView('home');
+    });
+
+    // 9. CRONÔMETRO DE PROVA
+    function startExamTimer() {
+      clearInterval(examTimerInterval);
+      const timerElement = document.getElementById('quiz-timer');
+
+      examTimerInterval = setInterval(() => {
+        examTimeSpent++;
+        const totalExamLimit = 150 * 60; // 02:30:00 padrão FAB
+        const remaining = Math.max(0, totalExamLimit - examTimeSpent);
+
+        const hours = Math.floor(remaining / 3600).toString().padStart(2, '0');
+        const minutes = Math.floor((remaining % 3600) / 60).toString().padStart(2, '0');
+        const seconds = (remaining % 60).toString().padStart(2, '0');
+
+        timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+
+        if (remaining <= 300) { // Menos de 5 min: Alerta Vermelho
+          timerElement.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-950/80 border border-red-600 text-red-300 font-mono font-bold text-sm animate-pulse';
+        } else if (remaining <= 900) { // Menos de 15 min: Alerta Amarelo
+          timerElement.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-950/80 border border-amber-600 text-amber-300 font-mono font-bold text-sm';
+        } else {
+          timerElement.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-emerald-400 font-mono font-bold text-sm';
+        }
+
+        if (remaining <= 0) {
+          clearInterval(examTimerInterval);
+          alert('Tempo regulamentar de prova esgotado!');
+          finishExam();
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "SIMULADO CFC - SAD - Curso de Formação de Cabos",
+  "description": "Plataforma completa de simulados e questões para o Curso de Formação de Cabos da Força Aérea Brasileira (CFC - SAD) com base nas apostilas oficiais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
