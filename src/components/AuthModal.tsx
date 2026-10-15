@@ -40,16 +40,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
 
   if (!isOpen) return null;
 
-  const handleDemoAccess = (withFullAccess: boolean = false) => {
-    const demoProfile = loginDemoStudent(withFullAccess);
-    onAuthSuccess(demoProfile);
-    onClose();
+  const handleDemoAccess = (withFullAccess: boolean = true) => {
+    try {
+      const demoProfile = loginDemoStudent(withFullAccess);
+      onAuthSuccess(demoProfile);
+      onClose();
+    } catch (e) {
+      console.error('Erro no login demo:', e);
+      setErrorMsg('Não foi possível iniciar a sessão de teste. Tente novamente.');
+    }
   };
 
   const handleContingencyAccess = () => {
-    const contingencyProfile = createContingencyStudent(name, email, false);
-    onAuthSuccess(contingencyProfile);
-    onClose();
+    try {
+      const contingencyProfile = createContingencyStudent(name, email, true);
+      onAuthSuccess(contingencyProfile);
+      onClose();
+    } catch (e) {
+      console.error('Erro na contingência:', e);
+      setErrorMsg('Erro ao entrar em modo contingência.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
       if (err.code === 'auth/operation-not-allowed') {
         setIsOperationNotAllowed(true);
         setErrorMsg(
-          'O provedor de E-mail/Senha está desativado no Firebase Console deste projeto (Authentication > Sign-in method > E-mail/Senha > Ativar). Para testar agora, use o botão de Acesso Rápido abaixo.'
+          'O provedor de E-mail/Senha está desativado no Firebase Console. Para entrar agora sem burocracia, utilize o botão de Aluno Teste abaixo.'
         );
       } else if (
         err.code === 'auth/user-not-found' ||
@@ -111,31 +121,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto w-full h-full">
       {/* Fundo Imersivo de Elite com Caça Gripen F-39 da FAB */}
       <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500 scale-102"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
         style={{ backgroundImage: `url(${fabGripenFighter})` }}
       />
       {/* Camada escura de sobreposição e leve desfoque para legibilidade total */}
       <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xs" />
 
       {/* Conteúdo do Modal */}
-      <div className="relative z-10 bg-white dark:bg-[#0B192C] w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col my-auto animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-10 bg-white dark:bg-[#0B192C] w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col my-auto animate-in fade-in zoom-in-95 duration-200 text-slate-900 dark:text-slate-100">
+        
         {/* Top Header com Brasão Oficial da FAB */}
-        <div className="p-6 bg-gradient-to-r from-[#002D62] to-[#0B192C] text-white flex items-center justify-between border-b border-[#D4AF37]/30">
+        <div className="p-5 sm:p-6 bg-gradient-to-r from-[#002D62] to-[#0B192C] text-white flex items-center justify-between border-b border-[#D4AF37]/30">
           <div className="flex items-center gap-3">
             <FabBadge size="md" />
             <div>
-              <h2 className="text-base font-bold tracking-tight">Portal do Aluno CFC SAD</h2>
-              <p className="text-xs text-blue-200">Autenticação Oficial & Sessão Única</p>
+              <h2 className="text-sm sm:text-base font-bold tracking-tight">Portal do Aluno CFC SAD</h2>
+              <p className="text-[11px] text-blue-200">Autenticação Oficial & Sessão Única</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-1.5 text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
             title="Fechar"
-            aria-label="Fechar"
           >
             <X className="w-5 h-5" />
           </button>
@@ -168,7 +179,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
           {errorMsg && (
             <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs space-y-2">
               <div className="flex items-start gap-2">
@@ -178,9 +189,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
 
               {isOperationNotAllowed && (
                 <div className="pt-2 border-t border-red-200/60 dark:border-red-800/60 flex flex-col gap-2">
-                  <span className="font-bold text-[11px] text-red-900 dark:text-red-200">
-                    Deseja prosseguir imediatamente mesmo com o provedor desativado no Firebase Console?
-                  </span>
                   {email && (
                     <button
                       type="button"
@@ -193,10 +201,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
                   )}
                   <button
                     type="button"
-                    onClick={() => handleDemoAccess(false)}
-                    className="w-full py-2 px-3 rounded-lg bg-[#002D62] hover:bg-blue-900 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
+                    onClick={() => handleDemoAccess(true)}
+                    className="w-full py-2.5 px-3 rounded-lg bg-[#002D62] hover:bg-blue-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
                   >
-                    <span>Entrar como Aluno Teste</span>
+                    <span>Entrar como Aluno Teste (Acesso Total)</span>
                   </button>
                 </div>
               )}
@@ -223,7 +231,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: 3S Silva / Candidato CFC"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62] dark:focus:ring-blue-500"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62]"
                 />
               </div>
             </div>
@@ -241,7 +249,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu.email@exemplo.com"
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62] dark:focus:ring-blue-500"
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62]"
               />
             </div>
           </div>
@@ -270,7 +278,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62] dark:focus:ring-blue-500"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#002D62]"
                 />
               </div>
             </div>
@@ -287,12 +295,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
               </button>
             </div>
           )}
-
-          {/* Destaque da Proteção Antifraude */}
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
-            <KeyRound className="w-4 h-4 text-[#D4AF37] shrink-0" />
-            <span>Sessão única ativa: o acesso simultâneo em outro aparelho encerra este com segurança.</span>
-          </div>
 
           {/* Botão de Ação */}
           <button
@@ -317,15 +319,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuc
             )}
           </button>
 
-          {/* Acesso Rápido de Teste Alternativo */}
+          {/* Botão Direto de Aluno Teste */}
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center">
             <button
               type="button"
-              onClick={() => handleDemoAccess(false)}
-              className="text-xs text-slate-500 hover:text-[#002D62] dark:hover:text-blue-400 font-medium inline-flex items-center gap-1"
+              onClick={() => handleDemoAccess(true)}
+              className="w-full py-2.5 px-4 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900 text-[#002D62] dark:text-blue-300 font-bold text-xs border border-blue-200 dark:border-blue-800 flex items-center justify-center gap-2 transition-colors"
             >
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>Deseja testar sem credenciais? Entrar como Aluno Teste</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Entrar como Aluno Teste (Acesso Completo Imediato)</span>
             </button>
           </div>
         </form>
